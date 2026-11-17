@@ -33,7 +33,13 @@ def register(body: UserCreate, service: AuthService = Depends(get_auth_service))
     - Si devuelve un User → lo devolvés (FastAPI lo serializa con UserRead,
       que NO incluye el hash).
     """
-    raise NotImplementedError("TODO: implementar register")
+    user = service.register_user(body)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="El email ya está registrado",
+        )
+    return user
 
 
 @router.post("/login", response_model=Token)
@@ -51,4 +57,12 @@ def login(body: UserLogin, service: AuthService = Depends(get_auth_service)):
     🧠 El `sub` del token es el ID del usuario (como string). Por eso en
     `get_current_user` se hace `int(payload["sub"])`.
     """
-    raise NotImplementedError("TODO: implementar login")
+    user = service.authenticate_user(body.email, body.password)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Email o contraseña incorrectos",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token = create_access_token(str(user.id))
+    return Token(access_token=access_token, token_type="bearer")

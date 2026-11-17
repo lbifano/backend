@@ -27,4 +27,4 @@ def read_me(current_user: User = Depends(get_current_user)):
     `GET /api/tasks/{id}` y leer lo que quisiera. Ahora el server sabe quién
     sos, y vos decidís qué devolverle.
     """
-    raise NotImplementedError("TODO: implementar read_me")
+    return current_user

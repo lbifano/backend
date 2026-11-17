@@ -37,7 +37,7 @@ def hash_password(password: str) -> str:
 
     Pista: `password_hash.hash(password)`.
     """
-    raise NotImplementedError("TODO: implementar hash_password")
+    return password_hash.hash(password)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -47,7 +47,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     Pista: `password_hash.verify(plain_password, hashed_password)`.
     Devuelve True/False — NUNCA lanza si no coincide.
     """
-    raise NotImplementedError("TODO: implementar verify_password")
+    return password_hash.verify(plain_password, hashed_password)
 
 
 def create_access_token(subject: str, expires_minutes: int | None = None) -> str:
@@ -69,7 +69,12 @@ def create_access_token(subject: str, expires_minutes: int | None = None) -> str
     ⚠️ Importante: usá `datetime.now(timezone.utc)`. Sin timezone, el cálculo
     de expiración es frágil y rompe en distintos husos horarios.
     """
-    raise NotImplementedError("TODO: implementar create_access_token")
+    payload: dict = {"sub": subject}
+    expire = datetime.now(timezone.utc) + timedelta(
+        minutes=expires_minutes or ACCESS_TOKEN_EXPIRE_MINUTES
+    )
+    payload["exp"] = expire
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 
 def decode_token(token: str) -> dict:
@@ -89,4 +94,4 @@ def decode_token(token: str) -> dict:
     401 es `get_current_user` (la capa HTTP). Igual que el 404 del Módulo 03:
     la seguridad no decide status codes, el controller sí.
     """
-    raise NotImplementedError("TODO: implementar decode_token")
+    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])

@@ -25,6 +25,11 @@ from app.models.user import User, UserCreate
 from app.repositories.user_repository import UserRepository
 from app.security import hash_password, verify_password
 
+# Hash "señuelo" (bonus timing attack): se calcula UNA vez al importar.
+# Cuando el email no existe, verificamos contra este hash igual, así el
+# login tarda lo mismo exista o no el usuario.
+_DUMMY_HASH = hash_password("dummy-password-para-tiempo-constante")
+
 
 class AuthService:
     """Casos de uso de autenticación: register y login."""
@@ -45,7 +50,11 @@ class AuthService:
           3. Hasheá la contraseña con `hash_password(body.password)`.
           4. Devolvé `repository.create(email, hashed)`.
         """
-        raise NotImplementedError("TODO: implementar register_user")
+        email = body.email.lower().strip()
+        if self.repository.get_by_email(email) is not None:
+            return None  # el controller lo traduce a 409
+        hashed = hash_password(body.password)
+        return self.repository.create(email, hashed)
 
     def authenticate_user(self, email: str, password: str) -> User | None:
         """
@@ -67,7 +76,14 @@ class AuthService:
         no existe, así el tiempo es constante. Investigá: ¿cómo lo harías?
         (Pista: `hash_password("dummy")` una sola vez, y verificá contra eso.)
         """
-        raise NotImplementedError("TODO: implementar authenticate_user")
+        email = email.lower().strip()
+        user = self.repository.get_by_email(email)
+        if user is None:
+            verify_password(password, _DUMMY_HASH)  # mismo costo que el caso real
+            return None
+        if not verify_password(password, user.hashed_password):
+            return None
+        return user
 
     def count_users(self) -> int:
         # EJEMPLO resuelto — el health check usa este método.
