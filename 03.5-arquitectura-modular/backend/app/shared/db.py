@@ -1,4 +1,4 @@
-"""Infraestructura: conexión a la base (engine + session + create_all)."""
+"""Infraestructura compartida (kernel): engine + session + create_all."""
 
 import os
 

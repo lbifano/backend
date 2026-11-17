@@ -1,0 +1,19 @@
+"""Puerto (interfaz) del repositorio de Task.
+
+El service depende de ESTA abstracción, no de la clase concreta.
+Cualquier clase con estos métodos lo cumple (tipado estructural):
+el adaptador SQLModel en producción, un fake in-memory en los tests.
+"""
+
+from typing import Protocol
+
+from app.tasks.schemas import Task, TaskUpdate
+
+
+class TaskRepository(Protocol):
+    def list_all(self) -> list[Task]: ...
+    def get_by_id(self, task_id: int) -> Task | None: ...
+    def create(self, title: str, project_id: int | None = None) -> Task: ...
+    def update(self, task: Task, data: TaskUpdate) -> Task: ...
+    def delete(self, task: Task) -> None: ...
+    def count(self) -> int: ...

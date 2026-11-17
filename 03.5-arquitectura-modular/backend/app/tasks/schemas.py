@@ -1,4 +1,4 @@
-"""Modelo Task (ORM + schemas)."""
+"""Schemas del feature tasks (ORM + DTOs)."""
 
 from datetime import datetime
 
@@ -38,9 +38,11 @@ class TaskUpdate(SQLModel):
 
     @field_validator("title")
     @classmethod
-    def title_no_vacio(cls, value: str | None) -> str | None:
+    def title_no_vacio(cls, value: str | None) -> str:
+        # Solo corre si el campo vino en el body: `{"title": null}` violaría
+        # el NOT NULL de la columna (500). Lo rechazamos como 422.
         if value is None:
-            return None
+            raise ValueError("El título no puede ser nulo")
         if not value.strip():
             raise ValueError("El título no puede estar vacío")
         return value

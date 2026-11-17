@@ -1,12 +1,15 @@
-"""Entrypoint — V1 (por capa técnica)."""
+"""Entrypoint — V2 (por feature)."""
 
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.controllers import health_controller, task_controller, project_controller
-from app.database import create_db_and_tables
+from app.billing.controller import router as billing_router
+from app.health.controller import router as health_router
+from app.projects.controller import router as projects_router
+from app.shared.db import create_db_and_tables
+from app.tasks.controller import router as tasks_router
 
 
 @asynccontextmanager
@@ -16,8 +19,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="03.5 — Arquitectura modular (V1: por capa)",
-    version="0.1.0",
+    title="03.5 — Arquitectura modular (V2: por feature)",
+    version="0.2.0",
     lifespan=lifespan,
 )
 
@@ -29,12 +32,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(task_controller.router)
-app.include_router(project_controller.router)
-app.include_router(health_controller.router)
+app.include_router(tasks_router)
+app.include_router(projects_router)
+app.include_router(billing_router)
+app.include_router(health_router)
 
 
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("app.main:app", host="127.0.0.1", port=8888, reload=True)

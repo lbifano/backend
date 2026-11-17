@@ -2,9 +2,10 @@
 
 from fastapi import APIRouter, Depends
 
-from app.dependencies import get_task_service, get_project_service
-from app.services.task_service import TaskService
-from app.services.project_service import ProjectService
+from app.projects.controller import get_project_service
+from app.projects.service import ProjectService
+from app.tasks.controller import get_task_service
+from app.tasks.service import TaskService
 
 router = APIRouter(prefix="/api", tags=["health"])
 
