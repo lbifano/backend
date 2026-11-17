@@ -37,3 +37,24 @@ def test_is_strong_true_cuando_no_hay_errores():
 
 def test_is_strong_false_cuando_hay_errores():
     assert is_strong("corta") is False
+
+
+# ── Fase 4 · Casos de borde ────────────────────────────────────────────────
+
+def test_validate_password_vacia_reporta_los_tres_problemas():
+    errores = validate_password("")
+    assert len(errores) == 3
+
+
+def test_validate_password_solo_numeros_falta_mayuscula():
+    errores = validate_password("12345678")
+    assert errores == ["falta una mayúscula"]
+
+
+def test_validate_password_exactamente_8_es_valida():
+    # Límite: el mínimo es 8 inclusive (< 8 falla, == 8 pasa).
+    assert validate_password("Abcdefg1") == []
+
+
+def test_validate_password_7_caracteres_es_corta():
+    assert validate_password("Abcdef1") == ["muy corta (mínimo 8 caracteres)"]
