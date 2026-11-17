@@ -28,19 +28,48 @@ router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 
 @router.get("", response_model=list[TaskRead])
 def list_tasks(service: TaskService = Depends(get_task_service)):
-    raise NotImplementedError("TODO: implementar list_tasks")
+    """GET /api/tasks — lista todas las tareas."""
+    return service.list_tasks()
 
 
-# TODO: agregá acá los endpoints que faltan:
-#   - GET /{task_id}
-#   - POST ""
-#   - PATCH /{task_id}
-#   - DELETE /{task_id}
-#
-# Recordá: cuando el service devuelve None (o False), acá se traduce a 404:
-#
-#   if task is None:
-#       raise HTTPException(
-#           status_code=status.HTTP_404_NOT_FOUND,
-#           detail=f"Tarea {task_id} no encontrada",
-#       )
+@router.get("/{task_id}", response_model=TaskRead)
+def get_task(task_id: int, service: TaskService = Depends(get_task_service)):
+    """GET /api/tasks/{task_id} — una tarea, o 404."""
+    task = service.get_task(task_id)
+    if task is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Tarea {task_id} no encontrada",
+        )
+    return task
+
+
+@router.post("", response_model=TaskRead, status_code=status.HTTP_201_CREATED)
+def create_task(body: TaskCreate, service: TaskService = Depends(get_task_service)):
+    """POST /api/tasks — crea una tarea (201)."""
+    return service.create_task(body)
+
+
+@router.patch("/{task_id}", response_model=TaskRead)
+def update_task(
+    task_id: int, body: TaskUpdate, service: TaskService = Depends(get_task_service)
+):
+    """PATCH /api/tasks/{task_id} — actualización parcial, o 404."""
+    task = service.update_task(task_id, body)
+    if task is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Tarea {task_id} no encontrada",
+        )
+    return task
+
+
+@router.delete("/{task_id}")
+def delete_task(task_id: int, service: TaskService = Depends(get_task_service)):
+    """DELETE /api/tasks/{task_id} — borra la tarea, o 404."""
+    if not service.delete_task(task_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Tarea {task_id} no encontrada",
+        )
+    return {"ok": True}
